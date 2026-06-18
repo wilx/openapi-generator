@@ -1402,6 +1402,7 @@ public class SpringCodegen extends AbstractJavaCodegen
             List<String> provideArgs = (List<String>) argObj;
             if (!provideArgs.isEmpty()) {
                 List<String> formattedArgs = new ArrayList<>();
+                List<String> formattedArgNames = new ArrayList<>();
                 for (String oneArg : provideArgs) {
                     if (StringUtils.isNotEmpty(oneArg)) {
                         String regexp = "(?<AnnotationTag>@)?(?<ClassPath>(?<PackageName>(\\w+\\.)*)(?<ClassName>\\w+))(?<Params>\\(.*?\\))?\\s?";
@@ -1424,9 +1425,14 @@ public class SpringCodegen extends AbstractJavaCodegen
                         String newArg = String.join(" ", newArgs);
                         LOGGER.trace("new arg {} {}", newArg);
                         formattedArgs.add(newArg);
+                        Matcher argNameMatcher = Pattern.compile("([A-Za-z_$][A-Za-z\\d_$]*)\\s*$").matcher(newArg);
+                        if (argNameMatcher.find()) {
+                            formattedArgNames.add(argNameMatcher.group(1));
+                        }
                     }
                 }
                 operation.getExtensions().put("x-spring-provide-args", formattedArgs);
+                operation.getExtensions().put("x-spring-provide-args-names", formattedArgNames);
             }
         }
         return provideArgsClassSet;
