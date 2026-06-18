@@ -8165,7 +8165,7 @@ public class SpringCodegenTest {
 
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApi.java"))
                 .fileContains("default ResponseEntity<Void> _foo(")
-                .fileContains("@Parameter(hidden = true) String providedArg")
+                .fileContains("@Parameter(hidden = true) @Size(max = 64) String providedArg")
                 .fileContains("return foo(providedArg);")
                 .fileContains("default  ResponseEntity<Void> foo(String providedArg)");
     }
@@ -8198,7 +8198,7 @@ public class SpringCodegenTest {
         generator.opts(input).generate();
 
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApi.java"))
-                .fileContains("@Parameter(hidden = true) String providedArg")
+                .fileContains("@Parameter(hidden = true) @Size(max = 64) String providedArg")
                 .fileContains("return getDelegate().foo(providedArg);");
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
                 .fileContains("default ResponseEntity<Void> foo(String providedArg)");
@@ -8244,7 +8244,7 @@ public class SpringCodegenTest {
         generator.opts(input).generate();
 
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiController.java"))
-                .fileContains("@Parameter(hidden = true) String providedArg")
+                .fileContains("@Parameter(hidden = true) @Size(max = 64) String providedArg")
                 .fileContains("return delegate.foo(providedArg);");
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
                 .fileContains("default ResponseEntity<Void> foo(String providedArg)");
@@ -8280,7 +8280,7 @@ public class SpringCodegenTest {
 
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApi.java"))
                 .fileContains("default ResponseEntity<Void> foo(")
-                .fileContains("@Parameter(hidden = true) String providedArg")
+                .fileContains("@Parameter(hidden = true) @Size(max = 64) String providedArg")
                 .fileDoesNotContain("default ResponseEntity<Void> _foo(")
                 .fileDoesNotContain("return foo(providedArg);");
     }

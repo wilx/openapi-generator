@@ -9,7 +9,7 @@ paths:
         - foo
       operationId: foo
       x-spring-provide-args:
-        - "String providedArg"
+        - "@Size(max = 64) String providedArg"
       responses:
         "204":
           description: no content
