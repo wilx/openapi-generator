@@ -8212,7 +8212,13 @@ public class SpringCodegenTest {
 
         final OpenAPI openAPI = TestUtils.parseFlattenSpec(
                 "src/test/resources/3_0/spring/x-spring-provide-args-api-interface.yaml");
-        final SpringCodegen codegen = new SpringCodegen();
+        final SpringCodegen codegen = new SpringCodegen() {
+            @Override
+            public void processOpts() {
+                super.processOpts();
+                additionalProperties().put("_api_controller_impl_", true);
+            }
+        };
         codegen.setOpenAPI(openAPI);
         codegen.setLibrary(SPRING_BOOT);
         codegen.setOutputDir(output.getAbsolutePath());
