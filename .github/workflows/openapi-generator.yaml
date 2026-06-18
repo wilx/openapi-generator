@@ -5,12 +5,12 @@ on:
     branches:
       - master
       - '[5-9]+.[0-9]+.x'
-      - work
+      - codex/add-regression-test-for-x-spring-provide-args-0r6o7w
   pull_request:
     branches:
       - master
       - '[5-9]+.[0-9]+.x'
-      - work
+      - codex/add-regression-test-for-x-spring-provide-args-0r6o7w
 
 jobs:
   build:
