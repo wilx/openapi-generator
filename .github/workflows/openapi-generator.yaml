@@ -5,10 +5,12 @@ on:
     branches:
       - master
       - '[5-9]+.[0-9]+.x'
+      - work
   pull_request:
     branches:
       - master
       - '[5-9]+.[0-9]+.x'
+      - work
 
 jobs:
   build:
