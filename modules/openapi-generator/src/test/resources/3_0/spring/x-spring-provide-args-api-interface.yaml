@@ -13,3 +13,13 @@ paths:
       responses:
         "204":
           description: no content
+  /bar:
+    get:
+      tags:
+        - foo
+      operationId: bar
+      x-spring-provide-args:
+        - "@RequestHeader String requestHeader"
+      responses:
+        "204":
+          description: no content

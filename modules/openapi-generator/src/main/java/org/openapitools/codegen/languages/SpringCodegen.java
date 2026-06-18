@@ -126,6 +126,7 @@ public class SpringCodegen extends AbstractJavaCodegen
 
     private static final Pattern X_SPRING_PROVIDE_ARG_PATTERN = Pattern.compile("(?<AnnotationTag>@)?(?<ClassPath>(?<PackageName>(\\w+\\.)*)(?<ClassName>\\w+))(?<Params>\\(.*?\\))?\\s?");
     private static final Pattern X_SPRING_PROVIDE_ARG_NAME_PATTERN = Pattern.compile("([A-Za-z_$][A-Za-z\\d_$]*)\\s*$");
+    private static final Pattern X_SPRING_PROVIDE_ARG_ANNOTATION_PATTERN = Pattern.compile("@[A-Za-z_$][A-Za-z\\d_$]*(\\(.*?\\))?\\s*");
 
     @Getter
     public enum RequestMappingMode {
@@ -1406,6 +1407,7 @@ public class SpringCodegen extends AbstractJavaCodegen
             if (!provideArgs.isEmpty()) {
                 List<String> formattedArgs = new ArrayList<>();
                 List<String> formattedArgNames = new ArrayList<>();
+                List<String> formattedDelegateArgs = new ArrayList<>();
                 for (String oneArg : provideArgs) {
                     if (StringUtils.isNotEmpty(oneArg)) {
                         Matcher matcher = X_SPRING_PROVIDE_ARG_PATTERN.matcher(oneArg);
@@ -1427,6 +1429,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                         String newArg = String.join(" ", newArgs);
                         LOGGER.trace("new arg {} {}", newArg);
                         formattedArgs.add(newArg);
+                        formattedDelegateArgs.add(X_SPRING_PROVIDE_ARG_ANNOTATION_PATTERN.matcher(newArg).replaceAll(""));
                         Matcher argNameMatcher = X_SPRING_PROVIDE_ARG_NAME_PATTERN.matcher(newArg);
                         if (argNameMatcher.find()) {
                             formattedArgNames.add(argNameMatcher.group(1));
@@ -1435,6 +1438,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                 }
                 operation.getExtensions().put("x-spring-provide-args", formattedArgs);
                 operation.getExtensions().put("x-spring-provide-args-names", formattedArgNames);
+                operation.getExtensions().put("x-spring-provide-args-delegate", formattedDelegateArgs);
             }
         }
         return provideArgsClassSet;

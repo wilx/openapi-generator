@@ -8199,7 +8199,46 @@ public class SpringCodegenTest {
                 .fileContains("@Parameter(hidden = true) String providedArg")
                 .fileContains("return getDelegate().foo(providedArg);");
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
-                .fileContains("default ResponseEntity<Void> foo(String providedArg)");
+                .fileContains("default ResponseEntity<Void> foo(String providedArg)")
+                .fileContains("default ResponseEntity<Void> bar(String requestHeader)")
+                .fileDoesNotContain("@RequestHeader String requestHeader");
+    }
+
+    @Test
+    public void shouldPassXSpringProvideArgsFromControllerToDelegate() throws IOException {
+        File output = Files.createTempDirectory("test").toFile().getCanonicalFile();
+        output.deleteOnExit();
+        String outputPath = output.getAbsolutePath().replace('\\', '/');
+
+        final OpenAPI openAPI = TestUtils.parseFlattenSpec(
+                "src/test/resources/3_0/spring/x-spring-provide-args-api-interface.yaml");
+        final SpringCodegen codegen = new SpringCodegen();
+        codegen.setOpenAPI(openAPI);
+        codegen.setLibrary(SPRING_BOOT);
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(DELEGATE_PATTERN, "true");
+
+        ClientOptInput input = new ClientOptInput();
+        input.openAPI(openAPI);
+        input.config(codegen);
+
+        DefaultGenerator generator = new DefaultGenerator();
+        generator.setGenerateMetadata(false);
+        generator.setGeneratorPropertyDefault(CodegenConstants.MODEL_TESTS, "false");
+        generator.setGeneratorPropertyDefault(CodegenConstants.MODEL_DOCS, "false");
+        generator.setGeneratorPropertyDefault(CodegenConstants.APIS, "true");
+
+        generator.opts(input).generate();
+
+        JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiController.java"))
+                .fileContains("@Parameter(hidden = true) String providedArg")
+                .fileContains("return delegate.foo(providedArg);")
+                .fileContains("@Parameter(hidden = true) @RequestHeader String requestHeader")
+                .fileContains("return delegate.bar(requestHeader);");
+        JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
+                .fileContains("default ResponseEntity<Void> foo(String providedArg)")
+                .fileContains("default ResponseEntity<Void> bar(String requestHeader)")
+                .fileDoesNotContain("@RequestHeader String requestHeader");
     }
 
 }
