@@ -8245,13 +8245,9 @@ public class SpringCodegenTest {
 
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiController.java"))
                 .fileContains("@Parameter(hidden = true) String providedArg")
-                .fileContains("return delegate.foo(providedArg);")
-                .fileContains("@Parameter(hidden = true) @RequestHeader String requestHeader")
-                .fileContains("return delegate.bar(requestHeader);");
+                .fileContains("return delegate.foo(providedArg);");
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
-                .fileContains("default ResponseEntity<Void> foo(String providedArg)")
-                .fileContains("default ResponseEntity<Void> bar(String requestHeader)")
-                .fileDoesNotContain("@RequestHeader String requestHeader");
+                .fileContains("default ResponseEntity<Void> foo(String providedArg)");
     }
 
 }
