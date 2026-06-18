@@ -124,6 +124,9 @@ public class SpringCodegen extends AbstractJavaCodegen
     public static final String SUBSTITUTE_GENERIC_PAGED_MODEL = "substituteGenericPagedModel";
     public static final String CLIENT_REGISTRATION_ID = "clientRegistrationId";
 
+    private static final Pattern PROVIDE_ARGS_PARAM_PATTERN = Pattern.compile("(?<AnnotationTag>@)?(?<ClassPath>(?<PackageName>(\\w+\\.)*)(?<ClassName>\\w+))(?<Params>\\(.*?\\))?\\s?");
+    private static final Pattern PROVIDE_ARGS_ARG_NAME_PATTERN = Pattern.compile("([A-Za-z_$][A-Za-z\\d_$]*)\\s*$");
+
     @Getter
     public enum RequestMappingMode {
         api_interface("Generate the @RequestMapping annotation on the generated Api Interface."),
@@ -1405,8 +1408,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                 List<String> formattedArgNames = new ArrayList<>();
                 for (String oneArg : provideArgs) {
                     if (StringUtils.isNotEmpty(oneArg)) {
-                        String regexp = "(?<AnnotationTag>@)?(?<ClassPath>(?<PackageName>(\\w+\\.)*)(?<ClassName>\\w+))(?<Params>\\(.*?\\))?\\s?";
-                        Matcher matcher = Pattern.compile(regexp).matcher(oneArg);
+                        Matcher matcher = PROVIDE_ARGS_PARAM_PATTERN.matcher(oneArg);
                         List<String> newArgs = new ArrayList<>();
                         while (matcher.find()) {
                             String className = matcher.group("ClassName");
@@ -1425,7 +1427,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                         String newArg = String.join(" ", newArgs);
                         LOGGER.trace("new arg {} {}", newArg);
                         formattedArgs.add(newArg);
-                        Matcher argNameMatcher = Pattern.compile("([A-Za-z_$][A-Za-z\\d_$]*)\\s*$").matcher(newArg);
+                        Matcher argNameMatcher = PROVIDE_ARGS_ARG_NAME_PATTERN.matcher(newArg);
                         if (argNameMatcher.find()) {
                             formattedArgNames.add(argNameMatcher.group(1));
                         }
