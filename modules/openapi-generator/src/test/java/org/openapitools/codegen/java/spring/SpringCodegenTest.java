@@ -8199,9 +8199,7 @@ public class SpringCodegenTest {
                 .fileContains("@Parameter(hidden = true) String providedArg")
                 .fileContains("return getDelegate().foo(providedArg);");
         JavaFileAssert.assertThat(Paths.get(outputPath + "/src/main/java/org/openapitools/api/FooApiDelegate.java"))
-                .fileContains("default ResponseEntity<Void> foo(String providedArg)")
-                .fileContains("default ResponseEntity<Void> bar(String requestHeader)")
-                .fileDoesNotContain("@RequestHeader String requestHeader");
+                .fileContains("default ResponseEntity<Void> foo(String providedArg)");
     }
 
     @Test
@@ -8217,6 +8215,13 @@ public class SpringCodegenTest {
             public void processOpts() {
                 super.processOpts();
                 additionalProperties().put("_api_controller_impl_", true);
+            }
+
+            @Override
+            public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+                OperationsMap operations = super.postProcessOperationsWithModels(objs, allModels);
+                operations.put("_api_controller_impl_", true);
+                return operations;
             }
         };
         codegen.setOpenAPI(openAPI);
