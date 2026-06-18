@@ -142,7 +142,7 @@ public class {{classname}}Controller implements {{classname}} {
         {{/async}}
     {{/isDelegate}}
     {{#isDelegate}}
-        {{^isVoid}}return {{/isVoid}}{{#isVoid}}{{#useResponseEntity}}return {{/useResponseEntity}}{{^useResponseEntity}}{{#reactive}}return {{/reactive}}{{/useResponseEntity}}{{/isVoid}}delegate.{{operationId}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-spring-paginated}}{{#hasParams}}, {{/hasParams}}{{^hasParams}}{{#reactive}}, {{/reactive}}{{/hasParams}}pageable{{/vendorExtensions.x-spring-paginated}}{{#vendorExtensions.x-spring-provide-args-names}}{{#-first}}{{#hasParams}}, {{/hasParams}}{{^hasParams}}{{#vendorExtensions.x-spring-paginated}}, {{/vendorExtensions.x-spring-paginated}}{{/hasParams}}{{/-first}}{{{.}}}{{^-last}}, {{/-last}}{{/vendorExtensions.x-spring-provide-args-names}});
+        {{^isVoid}}return {{/isVoid}}{{#isVoid}}{{#useResponseEntity}}return {{/useResponseEntity}}{{^useResponseEntity}}{{#reactive}}return {{/reactive}}{{/useResponseEntity}}{{/isVoid}}delegate.{{operationId}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-spring-paginated}}{{#hasParams}}, {{/hasParams}}{{^hasParams}}{{#reactive}}, {{/reactive}}{{/hasParams}}pageable{{/vendorExtensions.x-spring-paginated}}{{#vendorExtensions.springProvideArgsNames}}{{#-first}}{{#hasParams}}, {{/hasParams}}{{^hasParams}}{{#vendorExtensions.x-spring-paginated}}, {{/vendorExtensions.x-spring-paginated}}{{/hasParams}}{{/-first}}{{{.}}}{{^-last}}, {{/-last}}{{/vendorExtensions.springProvideArgsNames}});
     {{/isDelegate}}
     }
 

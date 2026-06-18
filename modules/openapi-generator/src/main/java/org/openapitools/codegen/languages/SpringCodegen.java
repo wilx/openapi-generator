@@ -1283,9 +1283,15 @@ public class SpringCodegen extends AbstractJavaCodegen
             importMapping.put("Pageable", "org.springframework.data.domain.Pageable");
         }
 
-        Set<String> provideArgsClassSet = reformatProvideArgsParams(operation);
+        ProvideArgsParams provideArgsParams = reformatProvideArgsParams(operation);
 
         CodegenOperation codegenOperation = super.fromOperation(path, httpMethod, operation, servers);
+        if (!provideArgsParams.names.isEmpty()) {
+            codegenOperation.vendorExtensions.put("springProvideArgsNames", provideArgsParams.names);
+        }
+        if (!provideArgsParams.delegateArgs.isEmpty()) {
+            codegenOperation.vendorExtensions.put("springProvideArgsDelegate", provideArgsParams.delegateArgs);
+        }
 
         // add org.springframework.format.annotation.DateTimeFormat when needed
         codegenOperation.allParams.stream().filter(p -> p.isDate || p.isDateTime).findFirst()
@@ -1314,8 +1320,8 @@ public class SpringCodegen extends AbstractJavaCodegen
                     generatePageableConstraintValidation, useBeanValidation,
                     generateSortValidation, SpringPageableScanUtils.AnnotationSyntax.JAVA);
         }
-        if (codegenOperation.vendorExtensions.containsKey("x-spring-provide-args") && !provideArgsClassSet.isEmpty()) {
-            codegenOperation.imports.addAll(provideArgsClassSet);
+        if (codegenOperation.vendorExtensions.containsKey("x-spring-provide-args") && !provideArgsParams.imports.isEmpty()) {
+            codegenOperation.imports.addAll(provideArgsParams.imports);
         }
 
         if (isSpringCodegen()) {
@@ -1399,8 +1405,8 @@ public class SpringCodegen extends AbstractJavaCodegen
         return codegenOperation;
     }
 
-    private Set<String> reformatProvideArgsParams(Operation operation) {
-        Set<String> provideArgsClassSet = new HashSet<>();
+    private ProvideArgsParams reformatProvideArgsParams(Operation operation) {
+        ProvideArgsParams provideArgsParams = new ProvideArgsParams();
         Object argObj = operation.getExtensions().get("x-spring-provide-args");
         if (argObj instanceof List) {
             List<String> provideArgs = (List<String>) argObj;
@@ -1422,7 +1428,7 @@ public class SpringCodegen extends AbstractJavaCodegen
                             newArgs.add(shortPhrase);
                             if (StringUtils.isNotEmpty(packageName)) {
                                 importMapping.put(className, classPath);
-                                provideArgsClassSet.add(className);
+                                provideArgsParams.imports.add(className);
                                 LOGGER.trace("put import mapping {} {}", className, classPath);
                             }
                         }
@@ -1437,11 +1443,17 @@ public class SpringCodegen extends AbstractJavaCodegen
                     }
                 }
                 operation.getExtensions().put("x-spring-provide-args", formattedArgs);
-                operation.getExtensions().put("x-spring-provide-args-names", formattedArgNames);
-                operation.getExtensions().put("x-spring-provide-args-delegate", formattedDelegateArgs);
+                provideArgsParams.names.addAll(formattedArgNames);
+                provideArgsParams.delegateArgs.addAll(formattedDelegateArgs);
             }
         }
-        return provideArgsClassSet;
+        return provideArgsParams;
+    }
+
+    private static final class ProvideArgsParams {
+        private final Set<String> imports = new HashSet<>();
+        private final List<String> names = new ArrayList<>();
+        private final List<String> delegateArgs = new ArrayList<>();
     }
 
     @Override
