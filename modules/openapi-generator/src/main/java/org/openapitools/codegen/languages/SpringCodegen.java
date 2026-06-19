@@ -1461,9 +1461,11 @@ public class SpringCodegen extends AbstractJavaCodegen
     }
 
     private void simplifyClassOrInterfaceType(ClassOrInterfaceType type, ProvideArgsParams provideArgsParams) {
-        type.getTypeArguments().ifPresent(typeArguments -> typeArguments.forEach(typeArgument ->
-                typeArgument.toClassOrInterfaceType().ifPresent(classOrInterfaceType ->
-                        simplifyClassOrInterfaceType(classOrInterfaceType, provideArgsParams))));
+        type.getTypeArguments().stream()
+                .flatMap(Collection::stream)
+                .map(typeArgument -> typeArgument.toClassOrInterfaceType())
+                .flatMap(Optional::stream)
+                .forEach(classOrInterfaceType -> simplifyClassOrInterfaceType(classOrInterfaceType, provideArgsParams));
         if (type.getScope().isPresent()) {
             String typeName = type.getNameWithScope();
             if (typeName.contains(".")) {
