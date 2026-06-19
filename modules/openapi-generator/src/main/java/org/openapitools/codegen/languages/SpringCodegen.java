@@ -23,6 +23,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.samskivert.mustache.Mustache;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -1463,7 +1464,7 @@ public class SpringCodegen extends AbstractJavaCodegen
     private void simplifyClassOrInterfaceType(ClassOrInterfaceType type, ProvideArgsParams provideArgsParams) {
         type.getTypeArguments().stream()
                 .flatMap(Collection::stream)
-                .map(typeArgument -> typeArgument.toClassOrInterfaceType())
+                .map(Type::toClassOrInterfaceType)
                 .flatMap(Optional::stream)
                 .forEach(classOrInterfaceType -> simplifyClassOrInterfaceType(classOrInterfaceType, provideArgsParams));
         if (type.getScope().isPresent()) {
