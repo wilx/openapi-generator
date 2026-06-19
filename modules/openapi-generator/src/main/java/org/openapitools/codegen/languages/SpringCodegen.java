@@ -17,6 +17,12 @@
 
 package org.openapitools.codegen.languages;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.samskivert.mustache.Mustache;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -50,7 +56,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -123,10 +128,6 @@ public class SpringCodegen extends AbstractJavaCodegen
     public static final String GENERATE_PAGEABLE_CONSTRAINT_VALIDATION = "generatePageableConstraintValidation";
     public static final String SUBSTITUTE_GENERIC_PAGED_MODEL = "substituteGenericPagedModel";
     public static final String CLIENT_REGISTRATION_ID = "clientRegistrationId";
-
-    private static final Pattern X_SPRING_PROVIDE_ARG_PATTERN = Pattern.compile("(?<AnnotationTag>@)?(?<ClassPath>(?<PackageName>(\\w+\\.)*)(?<ClassName>\\w+))(?<Params>\\(.*?\\))?\\s?");
-    private static final Pattern X_SPRING_PROVIDE_ARG_NAME_PATTERN = Pattern.compile("([A-Za-z_$][A-Za-z\\d_$]*)\\s*$");
-    private static final Pattern X_SPRING_PROVIDE_ARG_ANNOTATION_PATTERN = Pattern.compile("@[A-Za-z_$][A-Za-z\\d_$]*(\\(.*?\\))?\\s*");
 
     @Getter
     public enum RequestMappingMode {
@@ -1416,30 +1417,17 @@ public class SpringCodegen extends AbstractJavaCodegen
                 List<String> formattedDelegateArgs = new ArrayList<>();
                 for (String oneArg : provideArgs) {
                     if (StringUtils.isNotEmpty(oneArg)) {
-                        Matcher matcher = X_SPRING_PROVIDE_ARG_PATTERN.matcher(oneArg);
-                        List<String> newArgs = new ArrayList<>();
-                        while (matcher.find()) {
-                            String className = matcher.group("ClassName");
-                            String classPath = matcher.group("ClassPath");
-                            String packageName = matcher.group("PackageName");
-                            String params = matcher.group("Params");
-                            String annoTag = matcher.group("AnnotationTag");
-                            String shortPhrase = StringUtils.join(annoTag, className, params);
-                            newArgs.add(shortPhrase);
-                            if (StringUtils.isNotEmpty(packageName)) {
-                                importMapping.put(className, classPath);
-                                provideArgsParams.imports.add(className);
-                                LOGGER.trace("put import mapping {} {}", className, classPath);
-                            }
-                        }
-                        String newArg = String.join(" ", newArgs);
+                        Parameter parameter = parseProvideArgParameter(oneArg);
+                        collectImportsAndSimplify(parameter, provideArgsParams);
+
+                        String newArg = parameter.toString();
                         LOGGER.trace("new arg {} {}", newArg);
                         formattedArgs.add(newArg);
-                        formattedDelegateArgs.add(X_SPRING_PROVIDE_ARG_ANNOTATION_PATTERN.matcher(newArg).replaceAll(""));
-                        Matcher argNameMatcher = X_SPRING_PROVIDE_ARG_NAME_PATTERN.matcher(newArg);
-                        if (argNameMatcher.find()) {
-                            formattedArgNames.add(argNameMatcher.group(1));
-                        }
+
+                        Parameter delegateParameter = parameter.clone();
+                        delegateParameter.getAnnotations().clear();
+                        formattedDelegateArgs.add(delegateParameter.toString());
+                        formattedArgNames.add(parameter.getNameAsString());
                     }
                 }
                 operation.getExtensions().put("x-spring-provide-args", formattedArgs);
@@ -1448,6 +1436,44 @@ public class SpringCodegen extends AbstractJavaCodegen
             }
         }
         return provideArgsParams;
+    }
+
+    private Parameter parseProvideArgParameter(String oneArg) {
+        CompilationUnit compilationUnit = StaticJavaParser.parse(String.format("class Dummy { void method(%s) {} }", oneArg));
+        return compilationUnit.findFirst(MethodDeclaration.class)
+                .orElseThrow(() -> new IllegalArgumentException("Unable to parse x-spring-provide-args parameter: " + oneArg))
+                .getParameter(0);
+    }
+
+    private void collectImportsAndSimplify(Parameter parameter, ProvideArgsParams provideArgsParams) {
+        parameter.findAll(AnnotationExpr.class).forEach(annotation -> {
+            String annotationName = annotation.getNameAsString();
+            if (annotationName.contains(".")) {
+                String simpleName = annotation.getName().getIdentifier();
+                importMapping.put(simpleName, annotationName);
+                provideArgsParams.imports.add(simpleName);
+                annotation.setName(simpleName);
+                LOGGER.trace("put import mapping {} {}", simpleName, annotationName);
+            }
+        });
+
+        parameter.getType().toClassOrInterfaceType().ifPresent(type -> simplifyClassOrInterfaceType(type, provideArgsParams));
+    }
+
+    private void simplifyClassOrInterfaceType(ClassOrInterfaceType type, ProvideArgsParams provideArgsParams) {
+        type.getTypeArguments().ifPresent(typeArguments -> typeArguments.forEach(typeArgument ->
+                typeArgument.toClassOrInterfaceType().ifPresent(classOrInterfaceType ->
+                        simplifyClassOrInterfaceType(classOrInterfaceType, provideArgsParams))));
+        if (type.getScope().isPresent()) {
+            String typeName = type.getNameWithScope();
+            if (typeName.contains(".")) {
+                String simpleName = type.getNameAsString();
+                importMapping.put(simpleName, typeName);
+                provideArgsParams.imports.add(simpleName);
+                type.setScope(null);
+                LOGGER.trace("put import mapping {} {}", simpleName, typeName);
+            }
+        }
     }
 
     private static final class ProvideArgsParams {

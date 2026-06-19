@@ -9,7 +9,7 @@ paths:
         - foo
       operationId: foo
       x-spring-provide-args:
-        - "@Size(max = 64) String providedArg"
+        - "@jakarta.validation.constraints.Size(max = 64) String providedArg"
       responses:
         "204":
           description: no content
