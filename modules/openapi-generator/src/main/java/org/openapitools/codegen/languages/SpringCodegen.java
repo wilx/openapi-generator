@@ -1439,7 +1439,7 @@ public class SpringCodegen extends AbstractJavaCodegen
     }
 
     private Parameter parseProvideArgParameter(String oneArg) {
-        CompilationUnit compilationUnit = StaticJavaParser.parse(String.format("class Dummy { void method(%s) {} }", oneArg));
+        CompilationUnit compilationUnit = StaticJavaParser.parse(String.format(Locale.ROOT, "class Dummy { void method(%s) {} }", oneArg));
         return compilationUnit.findFirst(MethodDeclaration.class)
                 .orElseThrow(() -> new IllegalArgumentException("Unable to parse x-spring-provide-args parameter: " + oneArg))
                 .getParameter(0);
