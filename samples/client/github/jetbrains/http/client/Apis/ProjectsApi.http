@@ -10,7 +10,6 @@ Accept: application/json
   "permission" : "write"
 }
 
-
 ### Create a project card
 ## Create a new card
 POST https://api.github.com/projects/columns/{{column_id}}/cards
@@ -21,7 +20,6 @@ Accept: application/json
   "note" : "Add payload for delete Project column"
 }
 
-
 ### Create a project column
 POST https://api.github.com/projects/{{project_id}}/columns
 Content-Type: application/json
@@ -30,7 +28,6 @@ Accept: application/json
 {
   "name" : "Remaining tasks"
 }
-
 
 ### Create a user project
 ## Create a new project
@@ -43,7 +40,6 @@ Accept: application/json
   "body" : "A board to manage my personal projects."
 }
 
-
 ### Create an organization project
 POST https://api.github.com/orgs/{{org}}/projects
 Content-Type: application/json
@@ -53,7 +49,6 @@ Accept: application/json
   "name" : "Organization Roadmap",
   "body" : "High-level roadmap for the upcoming year."
 }
-
 
 ### Create a repository project
 POST https://api.github.com/repos/{{owner}}/{{repo}}/projects
@@ -65,69 +60,55 @@ Accept: application/json
   "body" : "Developer documentation project for the developer site."
 }
 
-
 ### Delete a project
-## Delete a project
 DELETE https://api.github.com/projects/{{project_id}}
 Accept: application/json
 
 ### Delete a project card
-## Delete a project card
 DELETE https://api.github.com/projects/columns/cards/{{card_id}}
 Accept: application/json
 
 ### Delete a project column
-## Delete a project column
 DELETE https://api.github.com/projects/columns/{{column_id}}
 Accept: application/json
 
 ### Get a project
-## Get a project
 GET https://api.github.com/projects/{{project_id}}
 Accept: application/json
 
 ### Get a project card
-## Get a project card
 GET https://api.github.com/projects/columns/cards/{{card_id}}
 Accept: application/json
 
 ### Get a project column
-## Get a project column
 GET https://api.github.com/projects/columns/{{column_id}}
 Accept: application/json
 
 ### Get project permission for a user
-## Get project permission for a user
 GET https://api.github.com/projects/{{project_id}}/collaborators/{{username}}/permission
 Accept: application/json
 
 ### List project cards
-## List project cards
 GET https://api.github.com/projects/columns/{{column_id}}/cards?archivedState={{archivedState}}&perPage={{perPage}}&page={{page}}
 Accept: application/json
 
 ### List project collaborators
-## List project collaborators
 GET https://api.github.com/projects/{{project_id}}/collaborators?affiliation={{affiliation}}&perPage={{perPage}}&page={{page}}
 Accept: application/json
 
 ### List project columns
-## List project columns
 GET https://api.github.com/projects/{{project_id}}/columns?perPage={{perPage}}&page={{page}}
 Accept: application/json
 
 ### List organization projects
-## List organization projects
 GET https://api.github.com/orgs/{{org}}/projects?state={{state}}&perPage={{perPage}}&page={{page}}
 Accept: application/json
 
 ### List repository projects
-## List repository projects
 GET https://api.github.com/repos/{{owner}}/{{repo}}/projects?state={{state}}&perPage={{perPage}}&page={{page}}
 Accept: application/json
 
 ### List user projects
-## List user projects
 GET https://api.github.com/users/{{username}}/projects?state={{state}}&perPage={{perPage}}&page={{page}}
 Accept: application/json
 
@@ -142,7 +123,6 @@ Accept: application/json
   "position" : "bottom"
 }
 
-
 ### Move a project column
 ## Move the column to the end of the board
 POST https://api.github.com/projects/columns/{{column_id}}/moves
@@ -153,9 +133,7 @@ Accept: application/json
   "position" : "last"
 }
 
-
 ### Remove user as a collaborator
-## Remove user as a collaborator
 DELETE https://api.github.com/projects/{{project_id}}/collaborators/{{username}}
 Accept: application/json
 
@@ -171,7 +149,6 @@ Accept: application/json
   "organization_permission" : "write"
 }
 
-
 ### Update an existing project card
 ## Change the note on the card
 PATCH https://api.github.com/projects/columns/cards/{{card_id}}
@@ -182,7 +159,6 @@ Accept: application/json
   "note" : "Add payload for delete Project column"
 }
 
-
 ### Update an existing project column
 ## Rename the project column
 PATCH https://api.github.com/projects/columns/{{column_id}}
@@ -192,4 +168,3 @@ Accept: application/json
 {
   "name" : "To Do"
 }
-
