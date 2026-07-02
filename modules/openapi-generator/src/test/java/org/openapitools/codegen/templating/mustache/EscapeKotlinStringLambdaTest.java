@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 OpenAPI-Generator Contributors (https://openapi-generator.tech)
- * Copyright 2018 SmartBear Software
+ * Copyright 2026 OpenAPI-Generator Contributors (https://openapi-generator.tech)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +19,6 @@ package org.openapitools.codegen.templating.mustache;
 import com.samskivert.mustache.Template;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -29,47 +27,34 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 
-public class TrimWhitespaceLambdaTest {
+public class EscapeKotlinStringLambdaTest {
 
     @Test
-    public void testTrimWhitespace() throws IOException {
+    public void escapesNormalStringCharactersAsFragmentStreams() throws Exception {
         Template.Fragment fragment = mock(Template.Fragment.class);
         doAnswer(invocation -> {
-            invocation.<Writer>getArgument(0).write("\t a  b\t\tc \t");
+            invocation.<Writer>getArgument(0).write("price is $");
+            invocation.<Writer>getArgument(0).write("5 \"quoted\" \\ path");
             return null;
         }).when(fragment).execute(any(Writer.class));
 
         StringWriter output = new StringWriter();
-        new TrimWhitespaceLambda().execute(fragment, output);
-        assertEquals(output.toString(), " a b c ");
+        new EscapeKotlinStringLambda().execute(fragment, output);
+
+        assertEquals(output.toString(), "price is \\$5 \\\"quoted\\\" \\\\ path");
     }
 
     @Test
-    public void trimsWhitespaceAcrossFragmentWrites() throws IOException {
+    public void preservesOtherTextWithoutBuffering() throws Exception {
         Template.Fragment fragment = mock(Template.Fragment.class);
         doAnswer(invocation -> {
-            invocation.<Writer>getArgument(0).write("alpha\t");
-            invocation.<Writer>getArgument(0).write("\n\r");
-            invocation.<Writer>getArgument(0).write("beta");
+            invocation.<Writer>getArgument(0).write("alpha\nbeta");
             return null;
         }).when(fragment).execute(any(Writer.class));
 
         StringWriter output = new StringWriter();
-        new TrimWhitespaceLambda().execute(fragment, output);
-        assertEquals(output.toString(), "alpha beta");
+        new EscapeKotlinStringLambda().execute(fragment, output);
+
+        assertEquals(output.toString(), "alpha\nbeta");
     }
-
-    @Test
-    public void preservesNonRegexWhitespaceCharacters() throws IOException {
-        Template.Fragment fragment = mock(Template.Fragment.class);
-        doAnswer(invocation -> {
-            invocation.<Writer>getArgument(0).write("alpha\u001Cbeta");
-            return null;
-        }).when(fragment).execute(any(Writer.class));
-
-        StringWriter output = new StringWriter();
-        new TrimWhitespaceLambda().execute(fragment, output);
-        assertEquals(output.toString(), "alpha\u001Cbeta");
-    }
-
 }
